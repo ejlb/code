@@ -1,4 +1,4 @@
-code
+Code
 ====
 
-general purpose repository
+Random collection of code
