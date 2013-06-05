@@ -14,9 +14,14 @@ description
 --@output
 --output
 
+--[[ scripts/meta/env --]]
+--[[ pass in app database --]]
+--[[ verify with extension --]]
+--[[ data location/author permissions --]]
+
 author = "Eddie Bell"
 license = "Same as Nmap--See http://nmap.org/book/man-legal.html"
-categories = {"default"}
+categories = {"discovery", "safe"}
 
 portrule = shortport.http
 
@@ -71,23 +76,16 @@ fingerprint_env = function(fingerprint, response)
   end
 end
 
-local fingerprint_functions = {
-    fingerprint_html,
-    fingerprint_headers,
-    fingerprint_meta,
-    fingerprint_script,
-    fingerprint_env
-}
+function fingerprint_implies(table, fingerprint)
+  if fingerprint['implies'] == nil then
+      return table
+  end
 
-function tprint (tbl, indent)
-  if not indent then indent = 0 end
-  for k, v in pairs(tbl) do
-    formatting = string.rep("  ", indent) .. k .. ": "
-    if type(v) == "table" then
-      print(formatting)
-      tprint(v, indent+1)
+  if type(fingerprint['implies']) == 'string' then
+      table.insert(found_webapps, fingerprint['implies'])
     else
-      print(formatting .. v)
+      for k,v in pairs(fingerprint['implies']) do
+        table.insert(found_webapps, v)
     end
   end
 end
@@ -122,30 +120,25 @@ action = function(host, port)
 
   local webapps = webapps_db['apps']
   local categories = webapps_db['categories']
+
+  local fingerprint_functions = {
+    fingerprint_html,
+    fingerprint_headers,
+    fingerprint_meta,
+    fingerprint_script,
+    fingerprint_env
+  }
+
   local found_webapps = {}
 
   for _, fingerprinter in pairs(fingerprint_functions) do
       for webapp, fingerprint in pairs(webapps) do
           if(fingerprinter(fingerprint, response)) then
               table.insert(found_webapps, webapp)
-              if not(fingerprint['implies'] == nil) then
-                  if type(fingerprint['implies']) == 'string' then
-                    table.insert(found_webapps, fingerprint['implies'])
-                  else
-                      for k,v in pairs(fingerprint['implies']) do
-                          table.insert(found_webapps, v)
-                      end
-                  end
-              end
+              table = fingerprint_implies(fingerprint, table)
           end
       end
   end
-
-  --[[ sort out \\version stuff --]]
-  --[[ cache regular expressions --]]
-  --[[ verify with extension --]]
-  --[[ refactor --]]
-  --[[ data location/author permissions --]]
 
   if not(next(found_webapps) == nil) then
       local uniq_found_webapps = {}
@@ -157,3 +150,4 @@ action = function(host, port)
       return table.concat(uniq_found_webapps, ', ')
   end
 end
+
