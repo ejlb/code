@@ -27,65 +27,65 @@ portrule = shortport.http
 
 fingerprint_html = function(fingerprint, response)
   if(not(fingerprint['html'])) then
-      return nil
+    return nil
   end
-  
+
   local regex = pcre.new(fingerprint["html"], 0, "C")
   return regex:match(response.body)
 end
 
 fingerprint_headers = function(fingerprint, response)
   if(not(fingerprint['headers'])) then
-      return nil
+    return nil
   end
 
   match = true
   for k,v in pairs(fingerprint['headers']) do
-      lk = string.lower(k)
+    lk = string.lower(k)
 
-      if(not(response.header[lk])) then
-          match = false
-          break
-      end
+    if(not(response.header[lk])) then
+      match = false
+      break
+    end
 
-      local regex = pcre.new(v, 0, "C")
+    local regex = pcre.new(v, 0, "C")
 
-      if(not(regex:match(response.header[lk]))) then
-          match = false
-          break
-      end
+    if(not(regex:match(response.header[lk]))) then
+      match = false
+      break
+    end
   end
   return match
 end
 
 fingerprint_meta = function(fingerprint, response)
   if(not(fingerprint['meta'])) then
-      return nil
+    return nil
   end
 end
 
 fingerprint_script = function(fingerprint, response)
   if(not(fingerprint['script'])) then
-      return nil
+    return nil
   end
 end
 
 fingerprint_env = function(fingerprint, response)
   if(not(fingerprint['env'])) then
-      return nil
+    return nil
   end
 end
 
 function fingerprint_implies(table, fingerprint)
   if fingerprint['implies'] == nil then
-      return table
+    return table
   end
 
   if type(fingerprint['implies']) == 'string' then
-      table.insert(found_webapps, fingerprint['implies'])
-    else
-      for k,v in pairs(fingerprint['implies']) do
-        table.insert(found_webapps, v)
+    table.insert(found_webapps, fingerprint['implies'])
+  else
+    for k,v in pairs(fingerprint['implies']) do
+      table.insert(found_webapps, v)
     end
   end
 end
@@ -108,14 +108,14 @@ action = function(host, port)
 
   local f = io.open('apps.json', 'r')
   if (not(f)) then
-      return false, 'Could not open the webapp fingerprint file'
+    return false, 'Could not open the webapp fingerprint file'
   end
 
   local webapp_json = f:read("*all")
 
   ret, webapps_db = json.parse(webapp_json)
   if(not(ret)) then
-      return false, 'Failed to parse the webapp fingerprint file'
+    return false, 'Failed to parse the webapp fingerprint file'
   end
 
   local webapps = webapps_db['apps']
@@ -132,22 +132,22 @@ action = function(host, port)
   local found_webapps = {}
 
   for _, fingerprinter in pairs(fingerprint_functions) do
-      for webapp, fingerprint in pairs(webapps) do
-          if(fingerprinter(fingerprint, response)) then
-              table.insert(found_webapps, webapp)
-              table = fingerprint_implies(fingerprint, table)
-          end
+    for webapp, fingerprint in pairs(webapps) do
+      if(fingerprinter(fingerprint, response)) then
+        table.insert(found_webapps, webapp)
+        table = fingerprint_implies(fingerprint, table)
       end
+    end
   end
 
   if not(next(found_webapps) == nil) then
-      local uniq_found_webapps = {}
-      for i,v in pairs(found_webapps) do
-        if(uniq_found_webapps[v] == nil) then
-            table.insert(uniq_found_webapps,v)
-        end
+    local uniq_found_webapps = {}
+    for i,v in pairs(found_webapps) do
+      if(uniq_found_webapps[v] == nil) then
+        table.insert(uniq_found_webapps,v)
       end
-      return table.concat(uniq_found_webapps, ', ')
+    end
+    return table.concat(uniq_found_webapps, ', ')
   end
 end
 
