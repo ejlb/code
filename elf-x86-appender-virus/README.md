@@ -22,9 +22,6 @@ root@5d3f53a66f94:/# cd /virus/
 root@5d3f53a66f94:/virus# make
 root@5d3f53a66f94:/virus# cd /tmp/
 
-root@203ff78bcad2:/tmp# ./host
-hello world
-
 root@5d3f53a66f94:/tmp# ./info.sh host
 **** host ****
 cb261f205ba23d2fcc49fecbcd91e072  host
@@ -37,6 +34,8 @@ root@5d3f53a66f94:/tmp# ./info.sh appender
 entry point address:              0x80482f0
 appender is infected
 
+root@203ff78bcad2:/tmp# ./host
+hello world
 root@203ff78bcad2:/tmp# ./appender
 infect
 root@203ff78bcad2:/tmp# ./host
