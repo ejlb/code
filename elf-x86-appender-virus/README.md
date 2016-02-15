@@ -28,7 +28,7 @@ hello world
 root@5d3f53a66f94:/tmp# ./info.sh host
 **** host ****
 cb261f205ba23d2fcc49fecbcd91e072  host
-entry point address:               0x8048320
+entry point address:              0x8048320
 host is clean
 
 root@5d3f53a66f94:/tmp# ./info.sh appender
@@ -46,6 +46,6 @@ hello world
 root@5d3f53a66f94:/tmp# ./info.sh host
 **** host ****
 72f68dd92d78201725a85b4b00254848  host
-entry point address:               0x80485bd
+entry point address:              0x80485bd
 host is infected
 ```
