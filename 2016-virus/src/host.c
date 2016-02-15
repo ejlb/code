@@ -2,5 +2,5 @@
 #include <stdlib.h>
 
 int main(void) {
-    printf("hello word\n");
+    printf("hello world\n");
 }
