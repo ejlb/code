@@ -9,5 +9,5 @@ all: appender.s host.c
 	@echo -n "***********\n Now go to /tmp to run the virus \n*************\n" 
 
 clean:
-	rm host appender appender-hardcoded detect/detector *.o
+	rm host appender detect/detector *.o
 

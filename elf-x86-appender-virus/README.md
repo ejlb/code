@@ -1,12 +1,58 @@
-ELF x86 32bit appender virus in 800b
-====================================
+ELF x86 32bit appender virus in 800b (with debug symbols)
+=========================================================
+The virus infects every infectable elf executable in the current directory using [Silvio's](https://en.wikipedia.org/wiki/Silvio_Cesare) classic .text section padding technique.
 
-The virus infects every infectable elf executable in the current directory 
-using Silvio's classic .text section padding technique.
-
-* mmap's host for improved efficiency 
+* mmap host for improved efficiency 
 * gets virus length using jmp trick so no bootstrapping
 * overwrites ELF header entry point
 
-'make' to compile the virus and an empty test host. Requires gcc and gas. 
-'make debug' for a version that includes symbols
+Compile
+-------
+
+The virus now runs in docker although you do not have to use docker. To compile the image run `docker build -t virus .`. To run the image use the `docker.sh` script. Once inside the docker container do `cd /virus/ && make` to compile. The virus code and host will be stored in `/tmp`
+
+```
+18:57 $ ./docker.sh
+
+root@5d3f53a66f94:/# cd /virus/
+root@5d3f53a66f94:/virus# make
+gcc -m32  -g appender.s -o /tmp/appender
+gcc -m32 host.c -o /tmp/host
+gcc -m32 detector.c -o detect/detector
+cp -r detect /tmp
+cp info.sh /tmp
+text size = 1729
+
+***********
+Now go to /tmp to run the virus
+***********
+
+root@5d3f53a66f94:/virus# cd /tmp/
+
+root@203ff78bcad2:/tmp# ./host
+hello world
+
+root@5d3f53a66f94:/tmp# ./info.sh host
+**** host ****
+cb261f205ba23d2fcc49fecbcd91e072  host
+entry point address:               0x8048320
+host is clean
+
+root@5d3f53a66f94:/tmp# ./info.sh appender
+**** appender ****
+81cb4c926b9da8cea19806f1fda2c658  appender
+entry point address:              0x80482f0
+appender is infected
+
+root@203ff78bcad2:/tmp# ./appender
+infect
+root@203ff78bcad2:/tmp# ./host
+infect
+hello world
+
+root@5d3f53a66f94:/tmp# ./info.sh host
+**** host ****
+72f68dd92d78201725a85b4b00254848  host
+entry point address:               0x80485bd
+host is infected
+```
